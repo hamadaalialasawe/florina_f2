@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { LogIn, Eye, EyeOff } from 'lucide-react';
-import { signIn } from '../lib/auth';
+import { signIn, ensureAdminExists } from '../lib/auth';
 import { useToast } from '../hooks/useToast';
 
 const LoginForm: React.FC = () => {
@@ -10,6 +10,11 @@ const LoginForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
 
+  // التحقق من وجود المدير عند تحميل الصفحة
+  React.useEffect(() => {
+    ensureAdminExists();
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -18,7 +23,20 @@ const LoginForm: React.FC = () => {
       await signIn(email, password);
       showToast('تم تسجيل الدخول بنجاح', 'success');
     } catch (error: any) {
-      showToast(error.message || 'خطأ في تسجيل الدخول', 'error');
+      console.error('خطأ في تسجيل الدخول:', error);
+      
+      // رسائل خطأ مخصصة
+      let errorMessage = 'خطأ في تسجيل الدخول';
+      
+      if (error.message?.includes('Invalid login credentials')) {
+        errorMessage = 'بيانات الدخول غير صحيحة. تأكد من البريد الإلكتروني وكلمة المرور.';
+      } else if (error.message?.includes('Email not confirmed')) {
+        errorMessage = 'يرجى تأكيد البريد الإلكتروني أولاً.';
+      } else if (error.message?.includes('Too many requests')) {
+        errorMessage = 'تم تجاوز عدد المحاولات المسموح. يرجى المحاولة لاحقاً.';
+      }
+      
+      showToast(errorMessage, 'error');
     } finally {
       setLoading(false);
     }

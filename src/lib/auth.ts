@@ -258,11 +258,13 @@ export const createMainAdmin = async () => {
       return existingAdmin;
     }
     
-    // إنشاء المدير
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+    // إنشاء المدير باستخدام التسجيل العادي
+    const { data: authData, error: authError } = await supabase.auth.signUp({
       email: adminEmail,
       password: adminPassword,
-      email_confirm: true,
+      options: {
+        emailRedirectTo: undefined,
+      }
     });
     
     if (authError) throw authError;
@@ -286,5 +288,27 @@ export const createMainAdmin = async () => {
   } catch (error) {
     console.error('خطأ في إنشاء المدير الرئيسي:', error);
     throw error;
+  }
+};
+
+// التحقق من وجود المدير وإنشاؤه إذا لم يكن موجوداً
+export const ensureAdminExists = async () => {
+  try {
+    const adminEmail = 'hamadaalialissawi@gmail.com';
+    
+    // التحقق من وجود المدير في قاعدة البيانات
+    const { data: existingProfile } = await supabase
+      .from('user_profiles')
+      .select('id')
+      .eq('email', adminEmail)
+      .eq('role', 'admin')
+      .single();
+    
+    if (!existingProfile) {
+      // إنشاء المدير إذا لم يكن موجوداً
+      await createMainAdmin();
+    }
+  } catch (error) {
+    console.error('خطأ في التحقق من وجود المدير:', error);
   }
 };

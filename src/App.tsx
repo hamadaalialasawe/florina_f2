@@ -6,9 +6,15 @@ import AdminDashboard from './components/AdminDashboard';
 import EmployeeDashboard from './components/EmployeeDashboard';
 import ToastContainer from './components/ToastContainer';
 import LoadingSpinner from './components/LoadingSpinner';
+import { ensureAdminExists } from './lib/auth';
 
 const AppContent: React.FC = () => {
   const { user, profile, loading } = useAuth();
+
+  // التأكد من وجود المدير عند بدء التطبيق
+  React.useEffect(() => {
+    ensureAdminExists();
+  }, []);
 
   if (loading) {
     return (
