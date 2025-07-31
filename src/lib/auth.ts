@@ -291,6 +291,8 @@ export const createMainAdmin = async () => {
           return;
         }
         console.error('خطأ في إنشاء الملف الشخصي:', profileError.message);
+      }
+      )
     
     if (profileError) throw profileError;
     
@@ -305,3 +307,5 @@ export const createMainAdmin = async () => {
 export const ensureAdminExists = async () => {
   try {
     console.log('محاولة إنشاء حساب المدير...');
+  }
+}
