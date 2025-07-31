@@ -10,11 +10,6 @@ const LoginForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
 
-  // التحقق من وجود المدير عند تحميل الصفحة
-  React.useEffect(() => {
-    ensureAdminExists();
-  }, []);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);

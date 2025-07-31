@@ -14,7 +14,7 @@ const AppContent: React.FC = () => {
   // التأكد من وجود المدير عند بدء التطبيق
   React.useEffect(() => {
     ensureAdminExists();
-  }, []);
+  }, []); // إضافة dependency array فارغ لتجنب التكرار
 
   if (loading) {
     return (

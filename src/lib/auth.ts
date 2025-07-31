@@ -260,7 +260,12 @@ export const createMainAdmin = async () => {
     
     // إنشاء المدير باستخدام التسجيل العادي
     const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: adminEmail,
+      // تجاهل خطأ المستخدم الموجود بالفعل
+      if (signUpError.message?.includes('already registered')) {
+        console.log('المدير موجود بالفعل في نظام المصادقة');
+        return;
+      }
+      console.error('خطأ في إنشاء المستخدم:', signUpError.message);
       password: adminPassword,
       options: {
         emailRedirectTo: undefined,
@@ -280,35 +285,23 @@ export const createMainAdmin = async () => {
         full_name: 'حمادة علي الليساوي',
         role: 'admin',
         is_active: true,
-      });
+        // تجاهل خطأ الملف الموجود بالفعل
+        if (profileError.code === '23505') {
+          console.log('الملف الشخصي للمدير موجود بالفعل');
+          return;
+        }
+        console.error('خطأ في إنشاء الملف الشخصي:', profileError.message);
     
     if (profileError) throw profileError;
     
     return authData.user;
   } catch (error) {
     console.error('خطأ في إنشاء المدير الرئيسي:', error);
-    throw error;
+    console.error('خطأ عام في إنشاء المدير:', error);
   }
 };
 
 // التحقق من وجود المدير وإنشاؤه إذا لم يكن موجوداً
 export const ensureAdminExists = async () => {
   try {
-    const adminEmail = 'hamadaalialissawi@gmail.com';
-    
-    // التحقق من وجود المدير في قاعدة البيانات
-    const { data: existingProfile } = await supabase
-      .from('user_profiles')
-      .select('id')
-      .eq('email', adminEmail)
-      .eq('role', 'admin')
-      .single();
-    
-    if (!existingProfile) {
-      // إنشاء المدير إذا لم يكن موجوداً
-      await createMainAdmin();
-    }
-  } catch (error) {
-    console.error('خطأ في التحقق من وجود المدير:', error);
-  }
-};
+    console.log('محاولة إنشاء حساب المدير...');
